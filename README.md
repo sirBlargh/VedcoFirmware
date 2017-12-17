@@ -1,0 +1,2 @@
+# VedcoFirmware
+Firmware for scale
