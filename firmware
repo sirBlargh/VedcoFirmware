@@ -10,7 +10,7 @@
 HX711 scale;
 #define DOUT A0
 #define CLK A1
-#define redLED 7
+#define redLED 12
 #define redLedOn digitalWrite(redLED, HIGH)
 #define redLedOff digitalWrite(redLED, LOW)
 
@@ -18,6 +18,7 @@ const long maxCapacity = 1000; //Weight that can be removed
 long currentCapacity;
 long lastReading;
 int lastMinute;
+long reading;
 time_t t = now();
 
 void setup() {
@@ -27,7 +28,7 @@ void setup() {
   scale.begin(DOUT, CLK);
   scale.set_scale(-26.48); //Calibration factor -25442 / 961
   scale.tare();
-  ledBlink(1);
+  ledBlink(1, 300);
   currentCapacity = maxCapacity;
   lastReading = getReading();
   lastMinute = 0;
@@ -36,7 +37,7 @@ void setup() {
 
 void loop() {
   
-  long reading = getReading();
+  reading = getReading();
   
   if(reading < lastReading){
     long diff = lastReading-reading;
@@ -55,16 +56,17 @@ void loop() {
   }
   
   if(currentCapacity < 300){
-    ledBlink(1);
+    ledBlink(1, 200);
+    Serial.println("--Warning, Capacity--");
   }
   
-  
+  tareScale(); 
   Serial.print("Reading: ");
   Serial.println(reading);
   Serial.print("current capacity: ");
   Serial.println(currentCapacity);
   
-  }
+}
 
 boolean hasOneMinutePassed(){
   t = now();
@@ -80,16 +82,27 @@ boolean hasOneMinutePassed(){
   return false;
 }
 
-void ledBlink(int blinkNr){
+void ledBlink(int blinkNr, int delaytime){
   
   for (int i = 0; i < blinkNr; i++){
     redLedOn;
-    delay(250);
+    delay(delaytime);
     redLedOff;
-    delay(250);
+    delay(delaytime);
   }
 }
 
 long getReading(){
   return 10*((long)scale.get_units(10)/10);
+}
+
+void tareScale(){
+  if(reading > 5){
+    Serial.println("--Weight added--");
+    scale.tare();
+  }
+  if(reading < -5){
+    Serial.println("--Weight removed--");
+    scale.tare();
+  }
 }
