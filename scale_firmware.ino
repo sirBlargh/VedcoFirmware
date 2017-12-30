@@ -44,6 +44,12 @@ void loop() {
     currentCapacity -= diff;
     lastReading = reading;
   }
+  if(reading > lastReading){
+    Serial.println("--Weight added--");
+    scale.tare();
+    lastReading = 0;
+  }
+
   
   if(hasOneMinutePassed()) {
     Serial.println("--New minute--");
@@ -60,7 +66,6 @@ void loop() {
     Serial.println("--Warning, Capacity--");
   }
   
-  tareScale(); 
   Serial.print("Reading: ");
   Serial.println(reading);
   Serial.print("current capacity: ");
@@ -94,15 +99,4 @@ void ledBlink(int blinkNr, int delaytime){
 
 long getReading(){
   return 10*((long)scale.get_units(10)/10);
-}
-
-void tareScale(){
-  if(reading > 5){
-    Serial.println("--Weight added--");
-    scale.tare();
-  }
-  if(reading < -5){
-    Serial.println("--Weight removed--");
-    scale.tare();
-  }
 }
